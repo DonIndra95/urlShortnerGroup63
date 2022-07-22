@@ -79,9 +79,10 @@ const urlShorten = async (req, res) => {
       urlCode: savedData.urlCode,
     };
 
+    res.status(201).send({ status: true, data: data });
+
     await SETEX_ASYNC(`${data.longUrl}`, 600, JSON.stringify(data));
 
-    res.status(201).send({ status: true, data: data });
   } catch (err) {
     res.status(500).send({ sattus: false, message: err.message });
   }
