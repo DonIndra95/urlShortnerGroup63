@@ -43,20 +43,12 @@ const urlShorten = async (req, res) => {
         .status(400)
         .send({ status: false, message: `'${longUrl}' is not a valid URL` });
 
-    //Checking if long URL is already present in our cache
-    let cachedData = await GET_ASYNC(`${longUrl}`);
-    if (cachedData)
-      return res
-        .status(200)
-        .send({ status: true, data: JSON.parse(cachedData) });
-
     //Checking if long URL is already present in our DB
     let checkLongUrl = await urlModel
       .findOne({ longUrl: longUrl })
       .select({ _id: 0, longUrl: 1, urlCode: 1, shortUrl: 1 });
 
     if (checkLongUrl) {
-      await SETEX_ASYNC(`${longUrl}`, 600, JSON.stringify(checkLongUrl));
       return res.status(200).send({ status: true, data: checkLongUrl });
     }
 
@@ -80,8 +72,6 @@ const urlShorten = async (req, res) => {
     };
 
     res.status(201).send({ status: true, data: data });
-
-    await SETEX_ASYNC(`${data.longUrl}`, 600, JSON.stringify(data));
 
   } catch (err) {
     res.status(500).send({ sattus: false, message: err.message });
@@ -121,9 +111,10 @@ const getUrl = async (req, res) => {
     if (!checkUrl)
       return res.status(404).send({ status: false, message: "URL not found" });
 
+    res.status(302).redirect(checkUrl.longUrl);
+
     await SETEX_ASYNC(`${urlCode}`, 60, checkUrl.longUrl);
 
-    res.status(302).redirect(checkUrl.longUrl);
   } catch (err) {
     res.status(500).send({ sattus: false, message: err.message });
   }
