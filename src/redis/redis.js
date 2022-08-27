@@ -1,22 +1,21 @@
-const { promisify } = require("util");
 const redis = require("redis");
 
-//Connect to redis
-const redisClient = redis.createClient(
-  14674,
-  "redis-14674.c264.ap-south-1-1.ec2.cloud.redislabs.com",
-  { no_ready_check: true }
-);
-redisClient.auth("L0heTOscTdBVNsqnedJYGXuP83MEXWHx", function (err) {
-  if (err) throw err;
+const client = redis.createClient({
+  url: "redis://default:L0heTOscTdBVNsqnedJYGXuP83MEXWHx@redis-14674.c264.ap-south-1-1.ec2.cloud.redislabs.com:14674",
 });
 
-redisClient.on("connect", async function () {
+(async () => {
+  await client.connect();
+})();
+
+client.on("connect", () => {
   console.log("Connected to Redis...");
 });
 
-const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
-const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
-const SETEX_ASYNC = promisify(redisClient.SETEX).bind(redisClient);
+client.on("error", (err) => console.log("Redis Client Error", err));
+
+const SET_ASYNC = client.SET.bind(client);
+const GET_ASYNC = client.GET.bind(client);
+const SETEX_ASYNC = client.SETEX.bind(client);
 
 module.exports = { SET_ASYNC, GET_ASYNC, SETEX_ASYNC };

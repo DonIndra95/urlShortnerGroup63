@@ -1,6 +1,6 @@
 const shortid = require("shortid");
 const isUrlValid = require('url-validation');
-const { GET_ASYNC, SETEX_ASYNC } = require("../redis/redis");
+const { GET_ASYNC, SETEX_ASYNC} = require("../redis/redis");
 const urlModel = require("../models/urlModel");
 
 //Request validation
